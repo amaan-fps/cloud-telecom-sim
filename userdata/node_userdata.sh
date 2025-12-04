@@ -18,6 +18,11 @@ sudo -u ubuntu -H bash -lc "
   pip install -r requirements.txt || pip install requests boto3
 "
 
+# Write config file used by node.py
+echo "http://$COLLECTOR_IP:5000" > /etc/telecom/collector_addr.conf
+chown ubuntu:ubuntu /etc/telecom/collector_addr.conf
+chmod 644 /etc/telecom/collector_addr.conf
+
 # create systemd unit for node
 cat > /etc/systemd/system/base-station.service <<'EOF'
 [Unit]
