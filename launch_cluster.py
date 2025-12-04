@@ -61,11 +61,11 @@ def create_instance(name, userdata_script, role):
     instance.wait_until_running()
     instance.reload()
 
-    # Wait for status checks
-    print("Waiting for status checks (this may take ~30s)...")
-    waiter = client.get_waiter("instance_status_ok")
-    waiter.wait(InstanceIds=[instance.id])
-    instance.reload()
+    # # Wait for status checks
+    # print("Waiting for status checks (this may take ~30s)...")
+    # waiter = client.get_waiter("instance_status_ok")
+    # waiter.wait(InstanceIds=[instance.id])
+    # instance.reload()
 
     print(f"{role} is running at Public: {instance.public_ip_address}, Private: {instance.private_ip_address}")
     return instance

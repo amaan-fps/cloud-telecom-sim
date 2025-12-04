@@ -4,6 +4,9 @@ import os
 import requests
 import socket
 import boto3
+from botocore import exceptions
+import urllib.request, json
+
 
 cfg_path = "/etc/telecom/collector_addr.conf"
 try:
@@ -18,10 +21,8 @@ session = requests.Session()
 node_id = None
 try:
     # if running on EC2, try to fetch tag 'Name'
-    from botocore import exceptions
     ec2 = boto3.client('ec2', region_name='ap-south-1')
     # metadata fetch
-    import urllib.request, json
     doc = json.loads(urllib.request.urlopen('http://169.254.169.254/latest/dynamic/instance-identity/document', timeout=2).read().decode())
     instance_id = doc.get('instanceId')
     if instance_id:
