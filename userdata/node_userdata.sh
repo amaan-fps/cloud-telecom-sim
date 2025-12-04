@@ -8,6 +8,12 @@ APP_DIR="/home/ubuntu/telecom-node"
 apt update -y
 apt install -y git python3 python3-pip python3-venv
 
+# Write config file used by node.py
+mkdir -p /etc/telecom
+echo "http://$COLLECTOR_IP:5000" | tee /etc/telecom/collector_addr.conf
+chown ubuntu:ubuntu /etc/telecom/collector_addr.conf
+chmod 644 /etc/telecom/collector_addr.conf
+
 sudo -u ubuntu -H bash -lc "
   rm -rf $APP_DIR
   git clone $REPO_URL $APP_DIR
@@ -17,11 +23,6 @@ sudo -u ubuntu -H bash -lc "
   pip install --upgrade pip
   pip install -r requirements.txt || pip install requests boto3
 "
-
-# Write config file used by node.py
-echo "http://$COLLECTOR_IP:5000" > /etc/telecom/collector_addr.conf
-chown ubuntu:ubuntu /etc/telecom/collector_addr.conf
-chmod 644 /etc/telecom/collector_addr.conf
 
 # create systemd unit for node
 cat > /etc/systemd/system/base-station.service <<'EOF'

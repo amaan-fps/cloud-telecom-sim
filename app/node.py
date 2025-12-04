@@ -6,11 +6,11 @@ import socket
 import boto3
 
 cfg_path = "/etc/telecom/collector_addr.conf"
-    try:
-        with open(cfg_path, "r") as f:
-            COLLECTOR = f.read().strip()
-    except FileNotFoundError:
-        COLLECTOR = "http://127.0.0.1:5000"  # fallback for dev
+try:
+    with open(cfg_path, "r") as f:
+        COLLECTOR = f.read().strip()
+except FileNotFoundError:
+    COLLECTOR = "http://127.0.0.1:5000"  # fallback for dev
 
 session = requests.Session()
 
