@@ -6,7 +6,7 @@ REPO_URL="https://github.com/amaan-fps/cloud-telecom-sim.git"
 APP_DIR="/home/ubuntu/telecom-node"
 
 apt update -y
-apt install -y git python3 python3-venv
+apt install -y git python3 python3-pip python3-venv
 
 sudo -u ubuntu -H bash -lc "
   rm -rf $APP_DIR
@@ -15,7 +15,7 @@ sudo -u ubuntu -H bash -lc "
   python3 -m venv venv
   source venv/bin/activate
   pip install --upgrade pip
-  pip install requests
+  pip install -r requirements.txt || pip install requests boto3
 "
 
 # create systemd unit for node

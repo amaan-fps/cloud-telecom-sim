@@ -5,7 +5,7 @@ import requests
 import socket
 import boto3
 
-OLLECTOR = os.environ.get("COLLECTOR_URL")  # prefer env var if setC
+COLLECTOR = os.environ.get("COLLECTOR_URL")  # prefer env var if set
 if not COLLECTOR:
     # fallback: check /etc or a file
     COLLECTOR = "http://<COLLECTOR_PRIVATE_IP>:5000"  # replaced by userdata template
