@@ -1,0 +1,76 @@
+<!-- app/templates/dashboard.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Telecom Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+    .status-online { color: green; font-weight: bold; }
+    .status-stale { color: orange; }
+    .status-offline { color: red; }
+    button { padding: 6px 10px; }
+  </style>
+</head>
+<body>
+  <h1>Telecom Nodes</h1>
+  <table id="nodes-table">
+    <thead>
+      <tr><th>Node ID</th><th>Last Seen</th><th>Age (s)</th><th>Latency (ms)</th><th>Loss</th><th>Signal</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchNodes() {
+      try {
+        const res = await fetch('/api/nodes');
+        const data = await res.json();
+        const tbody = document.querySelector('#nodes-table tbody');
+        tbody.innerHTML = '';
+        for (const n of data.nodes) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${n.node_id}</td>
+            <td>${n.last_seen}</td>
+            <td>${Math.round(n.age_seconds)}</td>
+            <td>${n.latency_ms}</td>
+            <td>${n.packet_loss}</td>
+            <td>${n.signal_strength}</td>
+            <td class="status-${n.status}">${n.status}</td>
+            <td><button onclick="terminateNode('${n.node_id}', this)">Terminate</button></td>
+          `;
+          tbody.appendChild(tr);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function terminateNode(nodeId, btn) {
+      if (!confirm('Terminate instance(s) for ' + nodeId + '?')) return;
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/nodes/terminate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ node_id: nodeId })
+        });
+        const json = await res.json();
+        alert(JSON.stringify(json));
+      } catch (e) {
+        alert('Error: ' + e);
+        console.error(e);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Poll every 2 seconds
+    fetchNodes();
+    setInterval(fetchNodes, 2000);
+  </script>
+</body>
+</html>
