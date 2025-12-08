@@ -40,6 +40,7 @@ def create_instance(name, userdata_script, role):
                     "Groups": [SECURITY_GROUP_ID],
                 }
             ],
+            IamInstanceProfile={'Name': 'TelecomCollectorProfile'},
             UserData=userdata_script,
             TagSpecifications=[
                 {

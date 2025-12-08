@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS heartbeats (
 """)
 conn.commit()
 
+ec2 = boto3.client("ec2", region_name="ap-south-1")
+
+# ---------- CONFIG ----------
+NODE_REGION = "ap-south-1"
+NODE_AMI = "ami-087d1c9a513324697"  # Example: ami-0cca134ec43cf708f
+NODE_INSTANCE_TYPE = "t3.micro"
+NODE_KEY_NAME = "telecom-project-key"
+NODE_SECURITY_GROUP_IDS = "sg-08a95bdc9288da588"  # telecom-sg
+NODE_SUBNET_ID = "subnet-0db6f526e79faf876"
+NODE_PROJECT_TAG = "CloudTelecomSim"
+
 # ---- Models ----
 class Beat(BaseModel):
     node_id: str
@@ -34,6 +45,57 @@ class Beat(BaseModel):
 
 class KillRequest(BaseModel):
     node_id: str
+
+class CreateNodesRequest(BaseModel):
+    count: int = 1
+    name_prefix: str = "base-station"
+    instance_type: str = None
+
+# ---- Helper Functions ----
+def _get_local_private_ip():
+    # Try standard metadata
+    try:
+        import urllib.request, json
+        doc = json.loads(urllib.request.urlopen('http://169.254.169.254/latest/dynamic/instance-identity/document', timeout=2).read().decode())
+        return doc.get('privateIp')
+    except Exception:
+        # fallback to socket
+        return socket.gethostbyname(socket.gethostname())
+
+# change name based on the existing node count
+def get_next_node_number(existing_names):
+    """
+    existing_names: list of strings like ['base-station-1', 'base-station-3']
+    returns the next available node number (gap filling)
+    """
+
+    used = []
+
+    # extract all valid numbers
+    for name in existing_names:
+        if name.startswith("base-station-"):
+            try:
+                num = int(name.replace("base-station-", ""))
+                used.append(num)
+            except ValueError:
+                pass
+
+    if not used:
+        return 1  # no nodes at all
+
+    used = sorted(used)
+
+    # gap-filling: find the smallest missing positive integer
+    expected = 1
+    for num in used:
+        if num == expected:
+            expected += 1
+        else:
+            # found a gap (e.g., 1,3 → missing 2)
+            return expected
+
+    # no gaps found → return next integer
+    return expected
 
 # ---- Endpoints ----
 @app.post("/heartbeat")
@@ -107,8 +169,6 @@ def get_nodes():
     return {"nodes": nodes}
 
 # Terminate node (requires instance IAM permissions or user credentials on server)
-ec2 = boto3.client("ec2", region_name="ap-south-1")
-
 @app.post("/api/nodes/terminate")
 def terminate_node(req: KillRequest):
     resp = ec2.describe_instances(
@@ -129,6 +189,52 @@ def terminate_node(req: KillRequest):
 
     ec2.terminate_instances(InstanceIds=instance_ids)
     return {"ok": True, "terminated": instance_ids}
+
+@app.post("/api/nodes/create")
+def create_nodes(req: CreateNodesRequest = Body(...)):
+    i = get_next_node_number()
+    name = f"base-station-{i}"
+    count = max(1, int(req.count))
+    inst_type = req.instance_type or NODE_INSTANCE_TYPE
+    collector_ip = _get_local_private_ip()
+
+    # read userdata template file (ensure this file is present in collector repo)
+    tpl_path = os.path.join(os.getcwd(), "templates/node_userdata.tpl")
+    if not os.path.exists(tpl_path):
+        return {"ok": False, "reason": "node_userdata.tpl missing on collector"}
+
+    userdata_tpl = open(tpl_path, "r").read()
+    userdata = userdata_tpl.replace("{{COLLECTOR_PRIVATE_IP}}", collector_ip)
+    
+    tag_spec = [
+        {
+            "ResourceType": "instance",
+            "Tags": [
+                {"Key": "Project", "Value": NODE_PROJECT_TAG},
+                {"Key": "Name", "Value": name},
+                {"Key": "Role", "Value": "BaseStation"},
+            ],
+        }
+    ]
+
+    # Launch
+    try:
+        resp = ec2.run_instances(
+            ImageId=NODE_AMI,
+            InstanceType=inst_type,
+            MinCount=count,
+            MaxCount=count,
+            KeyName=NODE_KEY_NAME,
+            SecurityGroupIds=NODE_SECURITY_GROUP_IDS,
+            SubnetId=NODE_SUBNET_ID,
+            UserData=userdata,
+            TagSpecifications=tag_spec,
+        )
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+    instance_ids = [i["InstanceId"] for i in resp.get("Instances", [])]
+    return {"ok": True, "launched": instance_ids}
 
 # Dashboard page
 @app.get("/dashboard", response_class=HTMLResponse)

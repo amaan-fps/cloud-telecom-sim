@@ -17,6 +17,7 @@ except FileNotFoundError:
 
 session = requests.Session()
 
+# FIXME node_id is always none after the below try block executes
 # Attempt to get a node id from EC2 metadata tags (if on EC2 with IAM)
 node_id = None
 try:
