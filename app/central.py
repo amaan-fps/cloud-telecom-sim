@@ -1,6 +1,6 @@
 # app/central.py
 import boto3
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -62,7 +62,39 @@ def _get_local_private_ip():
         # fallback to socket
         return socket.gethostbyname(socket.gethostname())
 
-# change name based on the existing node count
+# get existing node list
+def fetch_all_node_names_from_ec2():
+    """
+    Returns a sorted list of existing node numbers.
+    Example: ['base-station-1', 'base-station-3'] → [1, 3]
+    """
+    ec2 = boto3.client("ec2", region_name=REGION)
+
+    resp = ec2.describe_instances(
+        Filters=[
+            {"Name": "tag:Project", "Values": ["CloudTelecomSim"]},
+            {"Name": "instance-state-name", 
+             "Values": ["pending", "running"]}
+        ]
+    )
+
+    node_numbers = []
+
+    for reservation in resp.get("Reservations", []):
+        for inst in reservation.get("Instances", []):
+            tags = inst.get("Tags", [])
+            for t in tags:
+                if t.get("Key") == "Name" and isinstance(t.get("Value"), str):
+                    name = t["Value"]
+                    # Match pattern base-station-X
+                    m = re.match(r"base-station-(\d+)$", name)
+                    if m:
+                        node_numbers.append(int(m.group(1)))
+
+    return sorted(node_numbers)
+
+
+# get number for new node based on the existing node count
 def get_next_node_number(existing_names):
     """
     existing_names: list of strings like ['base-station-1', 'base-station-3']
@@ -192,7 +224,8 @@ def terminate_node(req: KillRequest):
 
 @app.post("/api/nodes/create")
 def create_nodes(req: CreateNodesRequest = Body(...)):
-    i = get_next_node_number()
+    existing_names = fetch_all_node_names_from_ec2()
+    i = get_next_node_number(existing_names)
     name = f"base-station-{i}"
     count = max(1, int(req.count))
     inst_type = req.instance_type or NODE_INSTANCE_TYPE
