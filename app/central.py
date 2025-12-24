@@ -6,6 +6,8 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import sqlite3
 from datetime import datetime, timezone
+import re
+import os
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -68,7 +70,7 @@ def fetch_all_node_names_from_ec2():
     Returns a sorted list of existing node numbers.
     Example: ['base-station-1', 'base-station-3'] → [1, 3]
     """
-    ec2 = boto3.client("ec2", region_name=REGION)
+    ec2 = boto3.client("ec2", region_name=NODE_REGION)
 
     resp = ec2.describe_instances(
         Filters=[
@@ -100,17 +102,15 @@ def get_next_node_number(existing_names):
     existing_names: list of strings like ['base-station-1', 'base-station-3']
     returns the next available node number (gap filling)
     """
-
     used = []
 
     # extract all valid numbers
-    for name in existing_names:
-        if name.startswith("base-station-"):
-            try:
-                num = int(name.replace("base-station-", ""))
-                used.append(num)
-            except ValueError:
-                pass
+    for num in existing_names:
+        try:
+            # num = int(name.replace("base-station-", ""))
+            used.append(num)
+        except ValueError:
+            pass
 
     if not used:
         return 1  # no nodes at all
@@ -237,7 +237,7 @@ def create_nodes(req: CreateNodesRequest = Body(...)):
         return {"ok": False, "reason": "node_userdata.tpl missing on collector"}
 
     userdata_tpl = open(tpl_path, "r").read()
-    userdata = userdata_tpl.replace("{{COLLECTOR_PRIVATE_IP}}", collector_ip)
+    userdata = userdata_tpl.replace("<COLLECTOR_PRIVATE_IP>", collector_ip)
     
     tag_spec = [
         {
@@ -258,7 +258,7 @@ def create_nodes(req: CreateNodesRequest = Body(...)):
             MinCount=count,
             MaxCount=count,
             KeyName=NODE_KEY_NAME,
-            SecurityGroupIds=NODE_SECURITY_GROUP_IDS,
+            SecurityGroupIds=[NODE_SECURITY_GROUP_IDS],
             SubnetId=NODE_SUBNET_ID,
             UserData=userdata,
             TagSpecifications=tag_spec,
