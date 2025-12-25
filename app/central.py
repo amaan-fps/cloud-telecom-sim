@@ -76,7 +76,7 @@ def fetch_all_node_names_from_ec2():
         Filters=[
             {"Name": "tag:Project", "Values": ["CloudTelecomSim"]},
             {"Name": "instance-state-name", 
-             "Values": ["pending", "running"]}
+             "Values": ["pending", "running", "stopping", "stopped", "shutting-down", "terminated"]}
         ]
     )
 
@@ -250,7 +250,7 @@ def create_nodes(req: CreateNodesRequest = Body(...)):
         }
     ]
 
-    # Launch
+    # FIXME when creating multiple nodes all at once they get created with same name
     try:
         resp = ec2.run_instances(
             ImageId=NODE_AMI,
@@ -260,6 +260,7 @@ def create_nodes(req: CreateNodesRequest = Body(...)):
             KeyName=NODE_KEY_NAME,
             SecurityGroupIds=[NODE_SECURITY_GROUP_IDS],
             SubnetId=NODE_SUBNET_ID,
+            IamInstanceProfile={'Name': 'TelecomCollectorProfile'},
             UserData=userdata,
             TagSpecifications=tag_spec,
         )
