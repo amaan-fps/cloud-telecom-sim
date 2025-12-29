@@ -3,6 +3,7 @@ import boto3
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import sqlite3
 from datetime import datetime, timezone
@@ -11,6 +12,8 @@ import os
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ---- SQLite setup ----
 conn = sqlite3.connect("telecom.db", check_same_thread=False)
