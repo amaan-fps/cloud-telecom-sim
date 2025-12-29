@@ -76,7 +76,7 @@ def fetch_all_node_names_from_ec2():
         Filters=[
             {"Name": "tag:Project", "Values": ["CloudTelecomSim"]},
             {"Name": "instance-state-name", 
-             "Values": ["pending", "running", "stopping", "stopped", "shutting-down", "terminated"]}
+             "Values": ["pending", "running"]}
         ]
     )
 
