@@ -70,6 +70,21 @@
     <tbody></tbody>
   </table>
 
+  <h2>Network Metrics</h2>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <div>
+      <h3>Network Latency</h3>
+      <canvas id="globalLatencyChart"></canvas>
+    </div>
+
+    <div>
+      <h3>Signal Strength per Node</h3>
+      <canvas id="globalSignalChart"></canvas>
+    </div>
+  </div>
+
+
   <!-- create node form-->
   <div id="create-node-panel">
     <h3>Create Node</h3>
@@ -106,7 +121,8 @@
   <script src="/static/js/panel.js"></script>
   <script src="/static/js/leaflet-map.js"></script>
   <script src="/static/js/summary.js"></script>
-  
+  <script src="/static/js/graphs.js"></script>
+
   <script>
     let selectedNodeId = null;
     let nodePanelInterval = null;
@@ -185,6 +201,7 @@
     initMap();
     fetchNodes();
     fetchSummary();
+    startGlobalGraphs();
     setInterval(fetchSummary, 2000);
     setInterval(fetchNodes, 2000);
     </script>

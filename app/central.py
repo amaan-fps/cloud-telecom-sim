@@ -282,6 +282,45 @@ def get_summary():
         "memory_avg": None
     }
 
+@app.get("/api/metrics/latency")
+def latency_timeseries(limit: int = 50):
+    cursor.execute("""
+        SELECT timestamp, AVG(latency_ms)
+        FROM heartbeats
+        GROUP BY timestamp
+        ORDER BY timestamp DESC
+        LIMIT ?
+    """, (limit,))
+    rows = cursor.fetchall()
+
+    rows.reverse()  # oldest → newest
+
+    return {
+        "labels": [r[0] for r in rows],
+        "values": [round(r[1], 2) for r in rows]
+    }
+
+@app.get("/api/metrics/signal")
+def signal_strength():
+    cursor.execute("""
+        SELECT h1.node_id, h1.signal_strength
+        FROM heartbeats h1
+        INNER JOIN (
+            SELECT node_id, MAX(timestamp) AS max_ts
+            FROM heartbeats
+            GROUP BY node_id
+        ) h2
+        ON h1.node_id = h2.node_id
+        AND h1.timestamp = h2.max_ts
+        ORDER BY h1.node_id
+    """)
+    rows = cursor.fetchall()
+
+    return {
+        "nodes": [r[0] for r in rows],
+        "signals": [r[1] for r in rows]
+    }
+
 
 # Terminate node (requires instance IAM permissions or user credentials on server)
 @app.post("/api/nodes/terminate")
