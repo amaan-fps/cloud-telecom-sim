@@ -40,6 +40,32 @@
     <div id="create-result"></div>
   </div>
 
+  <!-- Node Details Side Panel -->
+  <div id="node-panel" class="panel hidden">
+    <div class="panel-header">
+      <h2 id="panel-node-id">Node</h2>
+      <button onclick="closePanel()">✕</button>
+    </div>
+
+    <div class="panel-body">
+      <div class="panel-status" id="panel-status"></div>
+
+      <div class="panel-metrics">
+        <p><b>Latency:</b> <span id="panel-latency"></span> ms</p>
+        <p><b>Packet Loss:</b> <span id="panel-loss"></span></p>
+        <p><b>Signal:</b> <span id="panel-signal"></span></p>
+        <p><b>Last Seen:</b> <span id="panel-last-seen"></span></p>
+      </div>
+
+      <canvas id="latencyChart"></canvas>
+      <canvas id="signalChart"></canvas>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="/static/css/panel.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/static/js/panel.js"></script>
+
   <script>
     async function fetchNodes() {
       try {

@@ -48,14 +48,7 @@ function renderMap(nodes) {
       <div class="node-status">${node.status}</div>
     `;
 
-    el.onclick = () => {
-      alert(
-        `Node: ${node.node_id}\n` +
-        `Status: ${node.status}\n` +
-        `Latency: ${node.latency_ms} ms\n` +
-        `Loss: ${node.packet_loss}`
-      );
-    };
+    el.onclick = () => openPanel(node);
 
     mapGrid.appendChild(el);
 

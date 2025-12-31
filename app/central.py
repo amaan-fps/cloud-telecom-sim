@@ -203,6 +203,26 @@ def get_nodes():
 
     return {"nodes": nodes}
 
+# get specific node history
+@app.get("/api/nodes/{node_id}/history")
+def node_history(node_id: str, limit: int = 30):
+    cursor.execute("""
+        SELECT timestamp, latency_ms, signal_strength
+        FROM heartbeats
+        WHERE node_id = ?
+        ORDER BY id DESC
+        LIMIT ?
+    """, (node_id, limit))
+    rows = cursor.fetchall()[::-1]
+
+    return {
+        "node_id": node_id,
+        "history": [
+            {"ts": r[0], "latency": r[1], "signal": r[2]}
+            for r in rows
+        ]
+    }
+
 # Terminate node (requires instance IAM permissions or user credentials on server)
 @app.post("/api/nodes/terminate")
 def terminate_node(req: KillRequest):
