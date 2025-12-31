@@ -206,11 +206,15 @@ def get_nodes():
     return {"nodes": nodes}
 
 # get specific node history
-@app.get("/api/nodes/{node_id}/history")
+@app.get("/api/node/{node_id}/history")
 def node_history(
-    node_id: str = Path(...),
-    limit: int = 50
+    node_id: str,
+    limit: int = Query(50, ge=1, le=500)
 ):
+    """
+    Returns recent heartbeat history for a node.
+    Used for live charts in side panel.
+    """
     cursor.execute("""
         SELECT timestamp, latency_ms, packet_loss, signal_strength
         FROM heartbeats
@@ -227,11 +231,11 @@ def node_history(
         "points": [
             {
                 "timestamp": ts,
-                "latency_ms": lat,
+                "latency_ms": latency,
                 "packet_loss": loss,
-                "signal_strength": sig
+                "signal_strength": signal
             }
-            for ts, lat, loss, sig in rows
+            for ts, latency, loss, signal in rows
         ]
     }
 
