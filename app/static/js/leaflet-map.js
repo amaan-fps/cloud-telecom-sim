@@ -1,101 +1,35 @@
 let map;
-let markers = {}; // node_id -> marker
+let markers = {};       // node_id -> marker
+let links = {};         // node_id -> polyline
+let nodePositions = {}; // node_id -> [lat, lng]
+
+// Collector anchor (visual only)
+const COLLECTOR_ID = "collector";
+const COLLECTOR_POS = [22.0, 77.0]; // center-ish India
 
 function initMap() {
   map = L.map("leaflet-map", {
     zoomControl: false
-  }).setView([20, 78], 5); // India-ish center (purely visual)
+  }).setView(COLLECTOR_POS, 5);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap"
   }).addTo(map);
 }
 
-// Icons
-const icons = {
-  collector: L.icon({
-    iconUrl: "/static/images/collector.png",
-    iconSize: [60, 60],
-    iconAnchor: [30, 30]
-  }),
-  base: L.icon({
-    iconUrl: "/static/images/base_station.png",
-    iconSize: [50, 50],
-    iconAnchor: [25, 25]
-  })
-};
-
-// Fake but stable placement
-function getPosition(nodeId) {
-  let hash = 0;
-  for (let c of nodeId) hash += c.charCodeAt(0);
-  return [
-    18 + (hash % 10),
-    72 + (hash % 15)
-  ];
-}
+/* ---------------- ICONS ---------------- */
 
 function statusColor(status) {
-  if (status === "online") return "green";
-  if (status === "stale") return "orange";
-  return "red";
-}
-
-function addCollectorMarker() {
-  const collectorId = "collector";
-
-  if (markers[collectorId]) return;
-
-  const pos = [22, 77]; // fixed visual position (center-ish)
-
-  const marker = L.marker(pos, {
-    icon: createStatusIcon(
-      { status: "online" },
-      true // isCollector
-    ),
-    isCollector: true
-  }).addTo(map);
-
-  marker.on("click", () => openNodePanel(collectorId));
-
-  markers[collectorId] = marker;
-}
-
-
-function updateMap(nodes) {
-  // ✅ Ensure collector always exists
-  addCollectorMarker();
-
-  nodes.forEach(node => {
-    if (markers[node.node_id]) {
-      markers[node.node_id].setIcon(
-        createStatusIcon(node, markers[node.node_id].options.isCollector)
-      );
-      return;
-    }
-
-    const pos = getPosition(node.node_id);
-    
-    const marker = L.marker(pos, {
-      icon: createStatusIcon(node, false),
-      isCollector: false
-    }).addTo(map);
-
-
-    marker.on("click", () => openNodePanel(node));
-
-    markers[node.node_id] = marker;
-  });
+  if (status === "online") return "#2ecc71";
+  if (status === "stale") return "#f39c12";
+  return "#e74c3c";
 }
 
 function createStatusIcon(node, isCollector) {
   return L.divIcon({
     className: "",
     html: `
-      <div style="
-        position: relative;
-        text-align: center;
-      ">
+      <div style="position: relative; text-align: center;">
         <img src="/static/images/${isCollector ? "collector" : "base_station"}.png"
              style="width:${isCollector ? 60 : 50}px"/>
         <div style="
@@ -105,10 +39,112 @@ function createStatusIcon(node, isCollector) {
           width:14px;
           height:14px;
           border-radius:50%;
-          background:${statusColor(node.status)};
+          background:${statusColor(node.status || "online")};
           border:2px solid white;
         "></div>
       </div>
     `
+  });
+}
+
+/* ---------------- COLLECTOR ---------------- */
+
+function addCollectorMarker() {
+  if (markers[COLLECTOR_ID]) return;
+
+  const marker = L.marker(COLLECTOR_POS, {
+    icon: createStatusIcon({ status: "online" }, true),
+    isCollector: true
+  }).addTo(map);
+
+  marker.on("click", () => openNodePanel(COLLECTOR_ID));
+  markers[COLLECTOR_ID] = marker;
+}
+
+/* ---------------- POSITIONING ---------------- */
+
+// Stable random placement around collector
+function getNodePosition(nodeId) {
+  if (nodePositions[nodeId]) return nodePositions[nodeId];
+
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 0.8 + Math.random() * 1.5; // degrees-ish
+
+  const lat = COLLECTOR_POS[0] + Math.cos(angle) * radius;
+  const lng = COLLECTOR_POS[1] + Math.sin(angle) * radius;
+
+  nodePositions[nodeId] = [lat, lng];
+  return nodePositions[nodeId];
+}
+
+/* ---------------- LINKS ---------------- */
+
+function createOrUpdateLink(node) {
+  const nodeId = node.node_id;
+  const from = COLLECTOR_POS;
+  const to = nodePositions[nodeId];
+
+  const color = statusColor(node.status);
+
+  if (links[nodeId]) {
+    links[nodeId].setStyle({ color });
+    return;
+  }
+
+  const line = L.polyline([from, to], {
+    color,
+    weight: 2,
+    opacity: 0.8,
+    dashArray: node.status === "offline" ? "6,6" : null
+  }).addTo(map);
+
+  links[nodeId] = line;
+}
+
+/* ---------------- MAIN UPDATE ---------------- */
+
+function updateMap(nodes) {
+  addCollectorMarker();
+
+  const seen = new Set();
+
+  nodes.forEach(node => {
+    const nodeId = node.node_id;
+    seen.add(nodeId);
+
+    // Position
+    const pos = getNodePosition(nodeId);
+
+    // Marker
+    if (!markers[nodeId]) {
+      const marker = L.marker(pos, {
+        icon: createStatusIcon(node, false),
+        isCollector: false
+      }).addTo(map);
+
+      marker.on("click", () => openNodePanel(node));
+      markers[nodeId] = marker;
+    } else {
+      markers[nodeId].setIcon(createStatusIcon(node, false));
+    }
+
+    // Link to collector
+    createOrUpdateLink(node);
+  });
+
+  // Cleanup removed nodes
+  Object.keys(markers).forEach(id => {
+    if (id === COLLECTOR_ID) return;
+    if (!seen.has(id)) {
+      map.removeLayer(markers[id]);
+      delete markers[id];
+
+      if (links[id]) {
+        map.removeLayer(links[id]);
+        delete links[id];
+      }
+
+      delete nodePositions[id];
+    }
   });
 }
