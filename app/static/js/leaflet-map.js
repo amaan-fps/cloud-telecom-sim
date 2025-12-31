@@ -41,7 +41,31 @@ function statusColor(status) {
   return "red";
 }
 
+function addCollectorMarker() {
+  const collectorId = "collector";
+
+  if (markers[collectorId]) return;
+
+  const pos = [22, 77]; // fixed visual position (center-ish)
+
+  const marker = L.marker(pos, {
+    icon: createStatusIcon(
+      { status: "online" },
+      true // isCollector
+    ),
+    isCollector: true
+  }).addTo(map);
+
+  marker.on("click", () => openNodePanel(collectorId));
+
+  markers[collectorId] = marker;
+}
+
+
 function updateMap(nodes) {
+  // ✅ Ensure collector always exists
+  addCollectorMarker();
+
   nodes.forEach(node => {
     if (markers[node.node_id]) {
       markers[node.node_id].setIcon(
@@ -51,14 +75,14 @@ function updateMap(nodes) {
     }
 
     const pos = getPosition(node.node_id);
-    const isCollector = node.node_id.includes("collector");
-
+    
     const marker = L.marker(pos, {
-      icon: createStatusIcon(node, isCollector),
-      isCollector
+      icon: createStatusIcon(node, false),
+      isCollector: false
     }).addTo(map);
 
-    marker.on("click", () => openNodePanel(node.node_id));
+
+    marker.on("click", () => openNodePanel(node));
 
     markers[node.node_id] = marker;
   });
