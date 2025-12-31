@@ -4,6 +4,8 @@ from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi import Paths
+from typing import List
 from pydantic import BaseModel
 import sqlite3
 from datetime import datetime, timezone
@@ -205,21 +207,31 @@ def get_nodes():
 
 # get specific node history
 @app.get("/api/nodes/{node_id}/history")
-def node_history(node_id: str, limit: int = 30):
+def node_history(
+    node_id: str = Path(...),
+    limit: int = 50
+):
     cursor.execute("""
-        SELECT timestamp, latency_ms, signal_strength
+        SELECT timestamp, latency_ms, packet_loss, signal_strength
         FROM heartbeats
         WHERE node_id = ?
         ORDER BY id DESC
         LIMIT ?
     """, (node_id, limit))
-    rows = cursor.fetchall()[::-1]
+
+    rows = cursor.fetchall()
+    rows.reverse()  # oldest → newest for charts
 
     return {
         "node_id": node_id,
-        "history": [
-            {"ts": r[0], "latency": r[1], "signal": r[2]}
-            for r in rows
+        "points": [
+            {
+                "timestamp": ts,
+                "latency_ms": lat,
+                "packet_loss": loss,
+                "signal_strength": sig
+            }
+            for ts, lat, loss, sig in rows
         ]
     }
 

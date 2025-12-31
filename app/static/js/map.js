@@ -48,7 +48,7 @@ function renderMap(nodes) {
       <div class="node-status">${node.status}</div>
     `;
 
-    el.onclick = () => openPanel(node);
+    el.onclick = () => openNodePanel(node);
 
     mapGrid.appendChild(el);
 

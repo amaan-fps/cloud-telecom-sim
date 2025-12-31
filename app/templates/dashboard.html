@@ -44,7 +44,7 @@
   <div id="node-panel" class="panel hidden">
     <div class="panel-header">
       <h2 id="panel-node-id">Node</h2>
-      <button onclick="closePanel()">✕</button>
+      <button id="close-panel" onclick="closeNodePanel()">✕</button>
     </div>
 
     <div class="panel-body">
@@ -67,6 +67,9 @@
   <script src="/static/js/panel.js"></script>
 
   <script>
+    let selectedNodeId = null;
+    let nodePanelInterval = null;
+
     async function fetchNodes() {
       try {
         const res = await fetch('/api/nodes');
