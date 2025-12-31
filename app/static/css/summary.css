@@ -46,3 +46,9 @@
 .metric.offline {
   background: rgba(231, 76, 60, 0.25);
 }
+
+#summary-bar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
+}

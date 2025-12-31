@@ -25,185 +25,193 @@
   </style>
 </head>
 <body>
-  <!-- Global Summary Bar -->
-  <div id="summary-bar">
-    <div class="summary-left">
-      <h1>☁️ Cloud Telecom Network Simulation</h1>
-    </div>
-
-    <div class="summary-metrics">
-      <div class="metric">
-        <span class="metric-label">Total Nodes</span>
-        <span class="metric-value" id="sum-total">-</span>
-      </div>
-      <div class="metric online">
-        <span class="metric-label">Online</span>
-        <span class="metric-value" id="sum-online">-</span>
-      </div>
-      <div class="metric offline">
-        <span class="metric-label">Offline</span>
-        <span class="metric-value" id="sum-offline">-</span>
-      </div>
-      <div class="metric">
-        <span class="metric-label">Avg Latency</span>
-        <span class="metric-value" id="sum-latency">- ms</span>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- <h2>Network Map</h2>
-
-  <div id="map-container">
-    <svg id="map-lines"></svg>
-    <div id="map-grid"></div>
-  </div> -->
-
-  <h2>Network Map</h2>
-  <div id="leaflet-map"></div>
-
-  <h1>Telecom Nodes</h1>
-  <table id="nodes-table">
-    <thead>
-      <tr><th>Node ID</th><th>Last Seen</th><th>Age (s)</th><th>Latency (ms)</th><th>Loss</th><th>Signal</th><th>Status</th><th>Action</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <h2>Network Metrics</h2>
-
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-    <div>
-      <h3>Network Latency</h3>
-      <canvas id="globalLatencyChart"></canvas>
-    </div>
-
-    <div>
-      <h3>Signal Strength per Node</h3>
-      <canvas id="globalSignalChart"></canvas>
-    </div>
-  </div>
-
-
-  <!-- create node form-->
-  <div id="create-node-panel">
-    <h3>Create Node</h3>
-    <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label>
-    <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
-    <button id="create-node-btn">Create Node(s)</button>
-    <div id="create-result"></div>
-  </div>
-
-  <!-- Node Details Side Panel -->
-  <div id="side-panel" class="panel">
-    <div class="panel-header">
-      <h2 id="panel-title">Node</h2>
-      <button id="close-panel" onclick="closeNodePanel()">✕</button>
-    </div>
-
-    <div class="panel-body">
-      <div class="panel-status" id="panel-status"></div>
-
-      <div class="panel-metrics">
-        <p><b>Latency:</b> <span id="panel-latency"></span> ms</p>
-        <p><b>Packet Loss:</b> <span id="panel-loss"></span></p>
-        <p><b>Signal:</b> <span id="panel-signal"></span></p>
-        <p><b>Last Seen:</b> <span id="panel-last-seen"></span></p>
+  <div class="dashboard">
+    <!-- Global Summary Bar -->
+    <div id="summary-bar">
+      <div class="summary-left">
+        <h1>☁️ Cloud Telecom Network Simulation</h1>
       </div>
 
-      <canvas id="latencyChart"></canvas>
-      <canvas id="signalChart"></canvas>
+      <div class="summary-metrics">
+        <div class="metric">
+          <span class="metric-label">Total Nodes</span>
+          <span class="metric-value" id="sum-total">-</span>
+        </div>
+        <div class="metric online">
+          <span class="metric-label">Online</span>
+          <span class="metric-value" id="sum-online">-</span>
+        </div>
+        <div class="metric offline">
+          <span class="metric-label">Offline</span>
+          <span class="metric-value" id="sum-offline">-</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Avg Latency</span>
+          <span class="metric-value" id="sum-latency">- ms</span>
+        </div>
+      </div>
     </div>
-  </div>
-  
-  <link rel="stylesheet" href="/static/css/panel.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/static/js/panel.js"></script>
-  <script src="/static/js/leaflet-map.js"></script>
-  <script src="/static/js/summary.js"></script>
-  <script src="/static/js/graphs.js"></script>
 
-  <script>
-    let selectedNodeId = null;
-    let nodePanelInterval = null;
 
-    async function fetchNodes() {
-      try {
-        const res = await fetch('/api/nodes');
-        const data = await res.json();
-        const tbody = document.querySelector('#nodes-table tbody');
-        tbody.innerHTML = '';
-        for (const n of data.nodes) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${n.node_id}</td>
-            <td>${n.last_seen}</td>
-            <td>${Math.round(n.age_seconds)}</td>
-            <td>${n.latency_ms}</td>
-            <td>${n.packet_loss}</td>
-            <td>${n.signal_strength}</td>
-            <td class="status-${n.status}">${n.status}</td>
-            <td><button onclick="terminateNode('${n.node_id}', this)">Terminate</button></td>
-          `;
-          tbody.appendChild(tr);
+    <!-- <h2>Network Map</h2>
+
+    <div id="map-container">
+      <svg id="map-lines"></svg>
+      <div id="map-grid"></div>
+    </div> -->
+
+    <div class="card">
+      <h2>Network Map</h2>
+      <div id="leaflet-map"></div>
+    </div>
+
+    <div class="card"></div>
+      <h2>Telecom Nodes</h1>
+      <table id="nodes-table">
+        <thead>
+          <tr><th>Node ID</th><th>Last Seen</th><th>Age (s)</th><th>Latency (ms)</th><th>Loss</th><th>Signal</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Network Metrics</h2>
+
+      <div class="metrics-grid">
+        <div>
+          <h3>Network Latency</h3>
+          <canvas id="globalLatencyChart"></canvas>
+        </div>
+
+        <div>
+          <h3>Signal Strength per Node</h3>
+          <canvas id="globalSignalChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- create node form-->
+    <div id="create-node-panel">
+      <h3>Create Node</h3>
+      <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label>
+      <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
+      <button id="create-node-btn">Create Node(s)</button>
+      <div id="create-result"></div>
+    </div>
+
+    <!-- Node Details Side Panel -->
+    <div id="side-panel" class="panel">
+      <div class="panel-header">
+        <h2 id="panel-title">Node</h2>
+        <button id="close-panel" onclick="closeNodePanel()">✕</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="panel-status" id="panel-status"></div>
+
+        <div class="panel-metrics">
+          <p><b>Latency:</b> <span id="panel-latency"></span> ms</p>
+          <p><b>Packet Loss:</b> <span id="panel-loss"></span></p>
+          <p><b>Signal:</b> <span id="panel-signal"></span></p>
+          <p><b>Last Seen:</b> <span id="panel-last-seen"></span></p>
+        </div>
+
+        <canvas id="latencyChart"></canvas>
+        <canvas id="signalChart"></canvas>
+      </div>
+    </div>
+    
+    <link rel="stylesheet" href="/static/css/panel.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/panel.js"></script>
+    <script src="/static/js/leaflet-map.js"></script>
+    <script src="/static/js/summary.js"></script>
+    <script src="/static/js/graphs.js"></script>
+
+    <script>
+      let selectedNodeId = null;
+      let nodePanelInterval = null;
+
+      async function fetchNodes() {
+        try {
+          const res = await fetch('/api/nodes');
+          const data = await res.json();
+          const tbody = document.querySelector('#nodes-table tbody');
+          tbody.innerHTML = '';
+          for (const n of data.nodes) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${n.node_id}</td>
+              <td>${n.last_seen}</td>
+              <td>${Math.round(n.age_seconds)}</td>
+              <td>${n.latency_ms}</td>
+              <td>${n.packet_loss}</td>
+              <td>${n.signal_strength}</td>
+              <td class="status-${n.status}">${n.status}</td>
+              <td><button onclick="terminateNode('${n.node_id}', this)">Terminate</button></td>
+            `;
+            tbody.appendChild(tr);
+          }
+
+          // // 🔥 NEW: render map
+          // renderMap(data.nodes);
+          updateMap(data.nodes);
+
+        } catch (e) {
+          console.error(e);
         }
-
-        // // 🔥 NEW: render map
-        // renderMap(data.nodes);
-        updateMap(data.nodes);
-
-      } catch (e) {
-        console.error(e);
       }
-    }
 
-    async function terminateNode(nodeId, btn) {
-      if (!confirm('Terminate instance(s) for ' + nodeId + '?')) return;
-      btn.disabled = true;
-      try {
-        const res = await fetch('/api/nodes/terminate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ node_id: nodeId })
+      async function terminateNode(nodeId, btn) {
+        if (!confirm('Terminate instance(s) for ' + nodeId + '?')) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/nodes/terminate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ node_id: nodeId })
+          });
+          const json = await res.json();
+          alert(JSON.stringify(json));
+        } catch (e) {
+          alert('Error: ' + e);
+          console.error(e);
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      async function createNodes() {
+        const count = parseInt(document.getElementById("node-count").value) || 1;
+        const prefix = document.getElementById("node-prefix").value || "base-station";
+        document.getElementById("create-result").innerText = "Launching...";
+        const resp = await fetch("/api/nodes/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ count, name_prefix: prefix })
         });
-        const json = await res.json();
-        alert(JSON.stringify(json));
-      } catch (e) {
-        alert('Error: ' + e);
-        console.error(e);
-      } finally {
-        btn.disabled = false;
+        const data = await resp.json();
+        if (data.ok) {
+          document.getElementById("create-result").innerText = "Launched: " + (data.launched || []).join(", ");
+          // refresh nodes list (call your existing /api/nodes)
+          await fetchNodes(); 
+        } else {
+          document.getElementById("create-result").innerText = "Error: " + (data.error || data.reason || JSON.stringify(data));
+        }
       }
-    }
 
-    async function createNodes() {
-      const count = parseInt(document.getElementById("node-count").value) || 1;
-      const prefix = document.getElementById("node-prefix").value || "base-station";
-      document.getElementById("create-result").innerText = "Launching...";
-      const resp = await fetch("/api/nodes/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count, name_prefix: prefix })
-      });
-      const data = await resp.json();
-      if (data.ok) {
-        document.getElementById("create-result").innerText = "Launched: " + (data.launched || []).join(", ");
-        // refresh nodes list (call your existing /api/nodes)
-        await fetchNodes(); 
-      } else {
-        document.getElementById("create-result").innerText = "Error: " + (data.error || data.reason || JSON.stringify(data));
-      }
-    }
+      document.getElementById("create-node-btn").addEventListener("click", createNodes);
 
-    document.getElementById("create-node-btn").addEventListener("click", createNodes);
-
-    // Poll every 2 seconds
-    initMap();
-    fetchNodes();
-    fetchSummary();
-    startGlobalGraphs();
-    setInterval(fetchSummary, 2000);
-    setInterval(fetchNodes, 2000);
-    </script>
+      // Poll every 2 seconds
+      initMap();
+      fetchNodes();
+      fetchSummary();
+      startGlobalGraphs();
+      setInterval(fetchSummary, 2000);
+      setInterval(fetchNodes, 2000);
+      </script>
+    </div>
 </body>
 </html>

@@ -1,0 +1,79 @@
+:root {
+  --bg-page: #f4f6fb;
+  --bg-card: #ffffff;
+  --bg-dark: #0f172a;
+
+  --primary: #2563eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  --radius: 14px;
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-main);
+}
+
+.dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 24px;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+tr:hover {
+  background: #f8fafc;
+}
+
+@media (max-width: 900px) {
+  .summary-metrics {
+    flex-wrap: wrap;
+  }
+
+  .panel {
+    width: 100%;
+  }
+}

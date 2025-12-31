@@ -1,11 +1,11 @@
 #leaflet-map {
-  height: 420px;
-  width: 100%;
-  border-radius: 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #eef2ff, #f8fafc);
 }
 
-.leaflet-container {
-  background: #eaeaea;
+.leaflet-marker-icon {
+  transition: transform 0.2s ease;
+}
+.leaflet-marker-icon:hover {
+  transform: scale(1.08);
 }
