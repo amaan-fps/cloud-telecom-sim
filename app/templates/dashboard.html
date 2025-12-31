@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <link rel="stylesheet" href="/static/css/leaflet-map.css">
+  <link rel="stylesheet" href="/static/css/summary.css">
 
   <style>
     body { font-family: Arial, sans-serif; padding: 16px; }
@@ -24,6 +25,33 @@
   </style>
 </head>
 <body>
+  <!-- Global Summary Bar -->
+  <div id="summary-bar">
+    <div class="summary-left">
+      <h1>☁️ Cloud Telecom Network Simulation</h1>
+    </div>
+
+    <div class="summary-metrics">
+      <div class="metric">
+        <span class="metric-label">Total Nodes</span>
+        <span class="metric-value" id="sum-total">-</span>
+      </div>
+      <div class="metric online">
+        <span class="metric-label">Online</span>
+        <span class="metric-value" id="sum-online">-</span>
+      </div>
+      <div class="metric offline">
+        <span class="metric-label">Offline</span>
+        <span class="metric-value" id="sum-offline">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Avg Latency</span>
+        <span class="metric-value" id="sum-latency">- ms</span>
+      </div>
+    </div>
+  </div>
+
+
   <!-- <h2>Network Map</h2>
 
   <div id="map-container">
@@ -155,7 +183,10 @@
     // Poll every 2 seconds
     initMap();
     fetchNodes();
+    fetchSummary();
+    setInterval(fetchSummary, 2000);
     setInterval(fetchNodes, 2000);
     </script>
+    <script src="/static/js/summary.js"></script>
 </body>
 </html>

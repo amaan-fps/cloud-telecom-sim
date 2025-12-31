@@ -240,6 +240,34 @@ def node_history(
         ]
     }
 
+# Summary bar
+@app.get("/api/summary")
+def get_summary():
+    cursor.execute("""
+        SELECT
+            COUNT(DISTINCT node_id) as total,
+            SUM(CASE WHEN julianday('now') - julianday(timestamp) < (10/86400.0) THEN 1 ELSE 0 END) as online,
+            AVG(latency_ms) as avg_latency
+        FROM heartbeats
+    """)
+    row = cursor.fetchone()
+
+    total = row[0] or 0
+    online = row[1] or 0
+    offline = total - online
+    avg_latency = round(row[2], 1) if row[2] else 0
+
+    return {
+        "total_nodes": total,
+        "online_nodes": online,
+        "offline_nodes": offline,
+        "avg_latency": avg_latency,
+        # placeholders (future CloudWatch)
+        "cpu_avg": None,
+        "memory_avg": None
+    }
+
+
 # Terminate node (requires instance IAM permissions or user credentials on server)
 @app.post("/api/nodes/terminate")
 def terminate_node(req: KillRequest):

@@ -1,0 +1,48 @@
+#summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.summary-left h1 {
+  font-size: 22px;
+  margin: 0;
+}
+
+.summary-metrics {
+  display: flex;
+  gap: 20px;
+}
+
+.metric {
+  background: rgba(255,255,255,0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 110px;
+}
+
+.metric-label {
+  font-size: 11px;
+  opacity: 0.75;
+  display: block;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.metric.online {
+  background: rgba(46, 204, 113, 0.25);
+}
+
+.metric.offline {
+  background: rgba(231, 76, 60, 0.25);
+}
