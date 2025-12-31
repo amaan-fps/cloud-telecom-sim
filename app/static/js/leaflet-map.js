@@ -145,7 +145,7 @@ function updateMap(nodes) {
   if (!initialFitDone && mapBounds.isValid()) {
     map.fitBounds(mapBounds, {
       padding: [80, 80],  // breathing space around nodes
-      maxZoom: 8          // prevent over-zoom
+      maxZoom: 16          // prevent over-zoom
     });
     initialFitDone = true;
   }

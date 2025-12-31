@@ -240,29 +240,44 @@ def node_history(
         ]
     }
 
-# Summary bar
 @app.get("/api/summary")
 def get_summary():
     cursor.execute("""
         SELECT
-            COUNT(DISTINCT node_id) as total,
-            SUM(CASE WHEN julianday('now') - julianday(timestamp) < (10/86400.0) THEN 1 ELSE 0 END) as online,
-            AVG(latency_ms) as avg_latency
-        FROM heartbeats
+            COUNT(*) AS total_nodes,
+            SUM(
+                CASE
+                    WHEN (strftime('%s','now') - strftime('%s', timestamp)) < 10
+                    THEN 1 ELSE 0
+                END
+            ) AS online_nodes,
+            ROUND(AVG(latency_ms), 1) AS avg_latency
+        FROM (
+            SELECT h1.node_id, h1.timestamp, h1.latency_ms
+            FROM heartbeats h1
+            INNER JOIN (
+                SELECT node_id, MAX(timestamp) AS max_ts
+                FROM heartbeats
+                GROUP BY node_id
+            ) h2
+            ON h1.node_id = h2.node_id
+            AND h1.timestamp = h2.max_ts
+        );
     """)
+
     row = cursor.fetchone()
 
     total = row[0] or 0
     online = row[1] or 0
+    avg_latency = row[2] or 0
     offline = total - online
-    avg_latency = round(row[2], 1) if row[2] else 0
 
     return {
         "total_nodes": total,
         "online_nodes": online,
         "offline_nodes": offline,
         "avg_latency": avg_latency,
-        # placeholders (future CloudWatch)
+        # placeholders for later CloudWatch integration
         "cpu_avg": None,
         "memory_avg": None
     }
