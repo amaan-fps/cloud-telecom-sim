@@ -2,19 +2,23 @@ let map;
 let markers = {};       // node_id -> marker
 let links = {};         // node_id -> polyline
 let nodePositions = {}; // node_id -> [lat, lng]
+let mapBounds = null;
+let initialFitDone = false;
 
 // Collector anchor (visual only)
 const COLLECTOR_ID = "collector";
-const COLLECTOR_POS = [22.0, 77.0]; // center-ish India
+const COLLECTOR_POS = [28.5066158, 77.0567027]; // center-ish India
 
 function initMap() {
   map = L.map("leaflet-map", {
-    zoomControl: false
-  }).setView(COLLECTOR_POS, 5);
+    zoomControl: true
+  });
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "© OpenStreetMap"
   }).addTo(map);
+
+  mapBounds = L.latLngBounds([]); // 👈 initialize empty bounds
 }
 
 /* ---------------- ICONS ---------------- */
@@ -57,8 +61,10 @@ function addCollectorMarker() {
     isCollector: true
   }).addTo(map);
 
-  marker.on("click", () => openNodePanel(COLLECTOR_ID));
   markers[COLLECTOR_ID] = marker;
+  
+  // 👇 ADD TO BOUNDS
+  mapBounds.extend(pos);
 }
 
 /* ---------------- POSITIONING ---------------- */
@@ -68,7 +74,7 @@ function getNodePosition(nodeId) {
   if (nodePositions[nodeId]) return nodePositions[nodeId];
 
   const angle = Math.random() * Math.PI * 2;
-  const radius = 0.8 + Math.random() * 1.5; // degrees-ish
+  const radius = 0 + Math.random() * 0.2; // degrees-ish
 
   const lat = COLLECTOR_POS[0] + Math.cos(angle) * radius;
   const lng = COLLECTOR_POS[1] + Math.sin(angle) * radius;
@@ -124,6 +130,9 @@ function updateMap(nodes) {
 
       marker.on("click", () => openNodePanel(node));
       markers[nodeId] = marker;
+
+      // 👇 ADD TO BOUNDS
+      mapBounds.extend(pos);
     } else {
       markers[nodeId].setIcon(createStatusIcon(node, false));
     }
@@ -131,6 +140,16 @@ function updateMap(nodes) {
     // Link to collector
     createOrUpdateLink(node);
   });
+
+  // 👇 Fit map once after initial load
+  if (!initialFitDone && mapBounds.isValid()) {
+    map.fitBounds(mapBounds, {
+      padding: [80, 80],  // breathing space around nodes
+      maxZoom: 8          // prevent over-zoom
+    });
+    initialFitDone = true;
+  }
+
 
   // Cleanup removed nodes
   Object.keys(markers).forEach(id => {
