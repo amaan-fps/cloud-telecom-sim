@@ -1,81 +1,98 @@
-let currentNodeId = null;
+let panelNodeId = null;
 let panelInterval = null;
-
-let latencyChart, signalChart;
+let latencyChart = null;
+let signalChart = null;
 
 function openNodePanel(node) {
-  currentNodeId = node.node_id;
-  document.getElementById("side-panel").classList.add("open");
-  document.getElementById("panel-title").innerText = node.node_id;
+  panelNodeId = node.node_id;
 
-  startPanelUpdates();
+  document.getElementById("panel-title").innerText = node.node_id;
+  document.getElementById("side-panel").classList.add("open");
+
+  initCharts();
+  updatePanelData();
+
+  // Refresh every 2 seconds
+  panelInterval = setInterval(updatePanelData, 2000);
 }
 
 function closeNodePanel() {
+  panelNodeId = null;
   document.getElementById("side-panel").classList.remove("open");
-  currentNodeId = null;
-  if (panelInterval) clearInterval(panelInterval);
+
+  if (panelInterval) {
+    clearInterval(panelInterval);
+    panelInterval = null;
+  }
 }
 
-async function startPanelUpdates() {
-  if (panelInterval) clearInterval(panelInterval);
+async function updatePanelData() {
+  if (!panelNodeId) return;
 
-  await updatePanel();
-  panelInterval = setInterval(updatePanel, 3000);
+  try {
+    // Fetch latest snapshot
+    const res = await fetch("/api/nodes");
+    const data = await res.json();
+    const node = data.nodes.find(n => n.node_id === panelNodeId);
+    if (!node) return;
+
+    document.getElementById("panel-status").innerText = node.status;
+    document.getElementById("panel-status").className = "panel-status " + node.status;
+
+    document.getElementById("panel-latency").innerText = node.latency_ms;
+    document.getElementById("panel-loss").innerText = node.packet_loss;
+    document.getElementById("panel-signal").innerText = node.signal_strength;
+    document.getElementById("panel-last-seen").innerText = node.last_seen;
+
+    // Fetch history for charts
+    const hRes = await fetch(`/api/node/${panelNodeId}/history?limit=30`);
+    const history = await hRes.json();
+
+    updateCharts(history.points);
+
+  } catch (err) {
+    console.error("Panel update failed:", err);
+  }
 }
 
-async function updatePanel() {
-  if (!currentNodeId) return;
+function initCharts() {
+  const latencyCtx = document.getElementById("latencyChart").getContext("2d");
+  const signalCtx = document.getElementById("signalChart").getContext("2d");
 
-  const res = await fetch(`/api/nodes/${currentNodeId}/history`);
-  const data = await res.json();
-
-  const labels = data.points.map(p => p.timestamp.split("T")[1].slice(0, 8));
-  const latency = data.points.map(p => p.latency_ms);
-  const signal = data.points.map(p => p.signal_strength);
-
-  renderLatencyChart(labels, latency);
-  renderSignalChart(labels, signal);
-}
-
-function renderLatencyChart(labels, data) {
   if (latencyChart) latencyChart.destroy();
-
-  latencyChart = new Chart(
-    document.getElementById("latencyChart"),
-    {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "Latency (ms)",
-          data,
-          borderColor: "#3498db",
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true }
-    }
-  );
-}
-
-function renderSignalChart(labels, data) {
   if (signalChart) signalChart.destroy();
 
-  signalChart = new Chart(
-    document.getElementById("signalChart"),
-    {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "Signal Strength",
-          data,
-          borderColor: "#2ecc71",
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true }
-    }
-  );
+  latencyChart = new Chart(latencyCtx, {
+    type: "line",
+    data: { labels: [], datasets: [{
+      label: "Latency (ms)",
+      data: [],
+      borderColor: "#3498db",
+      tension: 0.3
+    }]},
+    options: { responsive: true, animation: false }
+  });
+
+  signalChart = new Chart(signalCtx, {
+    type: "line",
+    data: { labels: [], datasets: [{
+      label: "Signal Strength",
+      data: [],
+      borderColor: "#2ecc71",
+      tension: 0.3
+    }]},
+    options: { responsive: true, animation: false }
+  });
+}
+
+function updateCharts(points) {
+  const labels = points.map(p => p.timestamp.slice(11, 19));
+
+  latencyChart.data.labels = labels;
+  latencyChart.data.datasets[0].data = points.map(p => p.latency_ms);
+  latencyChart.update();
+
+  signalChart.data.labels = labels;
+  signalChart.data.datasets[0].data = points.map(p => p.signal_strength);
+  signalChart.update();
 }

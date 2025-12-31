@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi import Paths
+from fastapi import Path
 from typing import List
 from pydantic import BaseModel
 import sqlite3
