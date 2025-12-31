@@ -5,6 +5,14 @@
   <meta charset="utf-8">
   <title>Telecom Dashboard</title>
   <link rel="stylesheet" href="/static/css/map.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <link rel="stylesheet" href="/static/css/leaflet-map.css">
+
   <style>
     body { font-family: Arial, sans-serif; padding: 16px; }
     table { border-collapse: collapse; width: 100%; }
@@ -16,12 +24,12 @@
   </style>
 </head>
 <body>
-  <h2>Network Map</h2>
+  <!-- <h2>Network Map</h2>
 
   <div id="map-container">
     <svg id="map-lines"></svg>
     <div id="map-grid"></div>
-  </div>
+  </div> -->
 
   <h1>Telecom Nodes</h1>
   <table id="nodes-table">
@@ -91,8 +99,9 @@
           tbody.appendChild(tr);
         }
 
-        // 🔥 NEW: render map
-        renderMap(data.nodes);
+        // // 🔥 NEW: render map
+        // renderMap(data.nodes);
+        updateMap(data.nodes);
 
       } catch (e) {
         console.error(e);
@@ -140,9 +149,10 @@
     document.getElementById("create-node-btn").addEventListener("click", createNodes);
 
     // Poll every 2 seconds
+    initMap();
     fetchNodes();
     setInterval(fetchNodes, 2000);
   </script>
-  <script src="/static/js/map.js" async></script>
+  <script src="/static/js/leaflet-map.js"></script>
 </body>
 </html>
