@@ -72,11 +72,12 @@
       <canvas id="signalChart"></canvas>
     </div>
   </div>
-
+  
   <link rel="stylesheet" href="/static/css/panel.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/static/js/panel.js"></script>
-
+  <script src="/static/js/leaflet-map.js"></script>
+  
   <script>
     let selectedNodeId = null;
     let nodePanelInterval = null;
@@ -143,7 +144,7 @@
       if (data.ok) {
         document.getElementById("create-result").innerText = "Launched: " + (data.launched || []).join(", ");
         // refresh nodes list (call your existing /api/nodes)
-        await loadNodes(); 
+        await fetchNodes(); 
       } else {
         document.getElementById("create-result").innerText = "Error: " + (data.error || data.reason || JSON.stringify(data));
       }
@@ -155,7 +156,6 @@
     initMap();
     fetchNodes();
     setInterval(fetchNodes, 2000);
-  </script>
-  <script src="/static/js/leaflet-map.js"></script>
+    </script>
 </body>
 </html>
