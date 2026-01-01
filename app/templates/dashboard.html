@@ -26,34 +26,34 @@
   </style>
 </head>
 <body>
-  <div class="dashboard">
-    <!-- Global Summary Bar -->
-    <div id="summary-bar">
-      <div class="summary-left">
-        <h1>☁️ Cloud Telecom Network Simulation</h1>
-      </div>
-
-      <div class="summary-metrics">
-        <div class="metric">
-          <span class="metric-label">Total Nodes</span>
-          <span class="metric-value" id="sum-total">-</span>
-        </div>
-        <div class="metric online">
-          <span class="metric-label">Online</span>
-          <span class="metric-value" id="sum-online">-</span>
-        </div>
-        <div class="metric offline">
-          <span class="metric-label">Offline</span>
-          <span class="metric-value" id="sum-offline">-</span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">Avg Latency</span>
-          <span class="metric-value" id="sum-latency">- ms</span>
-        </div>
-      </div>
+  <!-- Global Summary Bar -->
+  <div id="summary-bar">
+    <div class="summary-left">
+      <h1>☁️ Cloud Telecom Network Simulation</h1>
     </div>
 
+    <div class="summary-metrics">
+      <div class="metric">
+        <span class="metric-label">Total Nodes</span>
+        <span class="metric-value" id="sum-total">-</span>
+      </div>
+      <div class="metric online">
+        <span class="metric-label">Online</span>
+        <span class="metric-value" id="sum-online">-</span>
+      </div>
+      <div class="metric offline">
+        <span class="metric-label">Offline</span>
+        <span class="metric-value" id="sum-offline">-</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Avg Latency</span>
+        <span class="metric-value" id="sum-latency">- ms</span>
+      </div>
+    </div>
+  </div>
 
+  <div class="dashboard">
+    
     <!-- <h2>Network Map</h2>
 
     <div id="map-container">
@@ -76,6 +76,15 @@
       </table>
     </div>
 
+    <!-- create node form-->
+    <div id="create-node-panel">
+      <h3>Create Node</h3>
+      <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label>
+      <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
+      <button id="create-node-btn">Create Node(s)</button>
+      <div id="create-result"></div>
+    </div>
+
     <div class="card">
       <h2>Network Metrics</h2>
 
@@ -90,16 +99,6 @@
           <canvas id="globalSignalChart"></canvas>
         </div>
       </div>
-    </div>
-
-
-    <!-- create node form-->
-    <div id="create-node-panel">
-      <h3>Create Node</h3>
-      <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label>
-      <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
-      <button id="create-node-btn">Create Node(s)</button>
-      <div id="create-result"></div>
     </div>
 
     <!-- Node Details Side Panel -->

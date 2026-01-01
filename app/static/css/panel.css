@@ -1,10 +1,35 @@
 .panel {
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
   border-left: 1px solid #e5e7eb;
+  position: fixed;
+  top: 0;
+  right: -420px;        /* hidden by default */
+  width: 400px;
+  height: 100vh;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+  transition: right 0.35s ease;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.open {
+  right: 0;             /* slide in */
 }
 
 .panel-header {
   font-weight: 600;
+  padding: 14px;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-body {
+  padding: 16px;
+  overflow-y: auto;
 }
 
 .panel canvas {

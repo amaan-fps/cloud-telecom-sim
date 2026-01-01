@@ -4,6 +4,7 @@
   width: 100%;
   border: 1px solid #e5e7eb;
   background: linear-gradient(180deg, #eef2ff, #f8fafc);
+  z-index: 1;   /* ensure map stays below summary */
 }
 
 .leaflet-marker-icon {

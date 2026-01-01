@@ -49,6 +49,6 @@
 
 #summary-bar {
   position: sticky;
-  top: 12px;
-  z-index: 20;
+  top: 0;
+  z-index: 1000;  /* must be higher than leaflet */
 }
