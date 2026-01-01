@@ -10,6 +10,8 @@
 
     document.getElementById("panel-title").innerText = node.node_id;
     document.getElementById("side-panel").classList.add("open");
+    const overlay = document.getElementById("overlay");
+    overlay.classList.add("active");
 
     initCharts();
     updatePanelData();
@@ -22,6 +24,9 @@
     panelNodeId = null;
     document.getElementById("side-panel").classList.remove("open");
 
+    const overlay = document.getElementById("overlay");
+    overlay.classList.remove("active");
+    
     if (panelInterval) {
       clearInterval(panelInterval);
       panelInterval = null;
