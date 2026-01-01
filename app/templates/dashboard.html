@@ -61,12 +61,12 @@
       <div id="map-grid"></div>
     </div> -->
 
-    <div class="card">
+    <div class="card map-card">
       <h2>Network Map</h2>
       <div id="leaflet-map"></div>
     </div>
 
-    <div class="card">
+    <div class="card grid-2">
       <h2>Telecom Nodes</h2>
       <table id="nodes-table">
         <thead>
@@ -74,16 +74,17 @@
         </thead>
         <tbody></tbody>
       </table>
+      
+      <!-- create node form-->
+      <div id="create-node-panel">
+        <!-- <h3>Create Node</h3> -->
+        <!-- <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label> -->
+        <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
+        <button id="create-node-btn">Create Node(s)</button>
+        <div id="create-result"></div>
+      </div>
     </div>
 
-    <!-- create node form-->
-    <div id="create-node-panel">
-      <h3>Create Node</h3>
-      <label>Count: <input id="node-count" type="number" value="1" min="1" max="10"></label>
-      <label>Name prefix: <input id="node-prefix" type="text" value="base-station"></label>
-      <button id="create-node-btn">Create Node(s)</button>
-      <div id="create-result"></div>
-    </div>
 
     <div class="card">
       <h2>Network Metrics</h2>

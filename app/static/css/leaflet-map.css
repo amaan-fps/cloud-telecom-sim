@@ -13,3 +13,20 @@
 .leaflet-marker-icon:hover {
   transform: scale(1.08);
 }
+
+.map-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.map-card h2 {
+  padding: 18px 22px;
+  margin: 0;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: white;
+  font-size: 16px;
+}
+
+#leaflet-map {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
