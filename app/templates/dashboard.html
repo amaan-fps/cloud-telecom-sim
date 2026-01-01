@@ -66,8 +66,8 @@
       <div id="leaflet-map"></div>
     </div>
 
-    <div class="card"></div>
-      <h2>Telecom Nodes</h1>
+    <div class="card">
+      <h2>Telecom Nodes</h2>
       <table id="nodes-table">
         <thead>
           <tr><th>Node ID</th><th>Last Seen</th><th>Age (s)</th><th>Latency (ms)</th><th>Loss</th><th>Signal</th><th>Status</th><th>Action</th></tr>
@@ -206,12 +206,15 @@
       document.getElementById("create-node-btn").addEventListener("click", createNodes);
 
       // Poll every 2 seconds
-      initMap();
-      fetchNodes();
-      fetchSummary();
-      startGlobalGraphs();
-      setInterval(fetchSummary, 2000);
-      setInterval(fetchNodes, 2000);
+      window.addEventListener("DOMContentLoaded", () => {
+        if (typeof initMap === "function") initMap();
+        if (typeof fetchNodes === "function") fetchNodes();
+        if (typeof fetchSummary === "function") fetchSummary();
+        if (typeof startGlobalGraphs === "function") startGlobalGraphs();
+
+        setInterval(fetchSummary, 2000);
+        setInterval(fetchNodes, 2000);
+      });
       </script>
     </div>
 </body>

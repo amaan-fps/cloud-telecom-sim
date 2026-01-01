@@ -1,4 +1,7 @@
 #leaflet-map {
+  height: 420px;
+  min-height: 420px;
+  width: 100%;
   border: 1px solid #e5e7eb;
   background: linear-gradient(180deg, #eef2ff, #f8fafc);
 }
