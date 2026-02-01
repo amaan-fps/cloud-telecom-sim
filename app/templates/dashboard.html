@@ -188,7 +188,8 @@
       }
 
       async function createNodes() {
-        const count = parseInt(document.getElementById("node-count").value) || 1;
+        // parseInt(document.getElementById("node-count").value)
+        const count = 1; // fixed
         const prefix = document.getElementById("node-prefix").value || "base-station";
         document.getElementById("create-result").innerText = "Launching...";
         const resp = await fetch("/api/nodes/create", {
