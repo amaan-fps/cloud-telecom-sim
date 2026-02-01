@@ -39,7 +39,7 @@ ec2 = boto3.client("ec2", region_name="ap-south-1")
 NODE_REGION = "ap-south-1"
 NODE_AMI = "ami-087d1c9a513324697"  # Example: ami-0cca134ec43cf708f
 NODE_INSTANCE_TYPE = "t3.micro"
-NODE_KEY_NAME = "telecom-project-key"
+NODE_KEY_NAME = "telecom-project-key-2"
 NODE_SECURITY_GROUP_IDS = "sg-08a95bdc9288da588"  # telecom-sg
 NODE_SUBNET_ID = "subnet-0db6f526e79faf876"
 NODE_PROJECT_TAG = "CloudTelecomSim"
